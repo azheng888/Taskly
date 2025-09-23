@@ -26,11 +26,21 @@ def index():
             db.session.commit()
             return redirect('/')
         except:
-            return 'There was an issue adding your task'
+            return 'Sorry, there was an issue adding your task!'
     else:
         tasks = Task.query.order_by(Task.date_created).all()
         return render_template('index.html', tasks=tasks)
 
+@app.route('/delete/<int:id>')
+def delete(id):
+    task_to_delete = Task.query.get_or_404(id)
+
+    try:
+        db.session.delete(task_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'Sorry, there was a problem deleting that task!'
 
 if __name__ == "__main__":
     with app.app_context():
