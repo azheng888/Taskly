@@ -16,8 +16,9 @@ class Task(db.Model):
         return '<Task %r>' % self.id
 
 @app.route('/')
-def hello():
-    return "Hello World"
+def index():
+    tasks = Task.query.order_by(Task.date_created).all()
+    return render_template('index.html', tasks=tasks)
 
 if __name__ == "__main__":
     app.run(debug=True)
