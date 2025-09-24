@@ -19,14 +19,18 @@ class Task(db.Model):
 def index():
     if request.method == 'POST':
         task_content = request.form['content']
-        new_task = Task(content=task_content)
         
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'Sorry, there was an issue adding your task!'
+        if task_content:
+            new_task = Task(content=task_content)
+            
+            try:
+                db.session.add(new_task)
+                db.session.commit()
+                return redirect('/')
+            except:
+                return 'Sorry, there was an issue adding your task!'
+        else:
+            return 'Task cannot be empty'
     else:
         tasks = Task.query.order_by(Task.date_created).all()
         return render_template('index.html', tasks=tasks)
