@@ -46,6 +46,20 @@ def delete(id):
     except:
         return 'Sorry, there was a problem deleting that task!'
 
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    task = Task.query.get_or_404(id)
+
+    if request.method == 'POST':
+        task.content = request.form['content']
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'There was an issue updating your task'
+    else:
+        return render_template('update.html', task=task)
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
