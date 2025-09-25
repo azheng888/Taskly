@@ -10,6 +10,7 @@ db = SQLAlchemy(app)
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -59,6 +60,17 @@ def update(id):
             return 'There was an issue updating your task'
     else:
         return render_template('update.html', task=task)
+
+@app.route('/complete/<int:id>')
+def complete(id):
+    task = Task.query.get_or_404(id)
+    task.completed = not task.completed
+    
+    try:
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'There was an issue updating the task'
 
 if __name__ == "__main__":
     with app.app_context():
