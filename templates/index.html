@@ -19,11 +19,22 @@
             </tr>
             {% for task in tasks %}
                 <tr>
-                    <td>{{ task.content }}</td>
+                    <td>
+                        {% if task.completed %}
+                            <s>{{ task.content }}</s> ✓
+                        {% else %}
+                            {{ task.content }}
+                        {% endif %}
+                    </td>
                     <td>{{ task.date_created.date() }}</td>
                     <td>
-                        <a href="/delete/{{task.id}}">Delete</a>
-                        <a href="/update/{{task.id}}">Update</a>
+                        {% if task.completed %}
+                            <a href="/complete/{{task.id}}">Mark Incomplete</a>
+                        {% else %}
+                            <a href="/complete/{{task.id}}">Mark Complete</a>
+                        {% endif %}
+                        | <a href="/delete/{{task.id}}">Delete</a>
+                        | <a href="/update/{{task.id}}">Update</a>
                     </td>
                 </tr>
             {% endfor %}
