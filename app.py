@@ -20,20 +20,25 @@ class Task(db.Model):
 @app.route('/', methods=['POST', 'GET'])
 def index():
     if request.method == 'POST':
-        task_content = request.form['content']
+        task_content = request.form['content'].strip()
         
-        if task_content:
+        if not task_content:
+            flash('Task cannot be empty', 'error')
+        elif len(task_content) > 200:
+            flash('Task is too long (max 200 characters)', 'error')
+        else:
             new_task = Task(content=task_content)
             
             try:
                 db.session.add(new_task)
                 db.session.commit()
-                return redirect('/')
+                flash('Task added successfully!', 'success')
+                
             except:
-                return 'Sorry, there was an issue adding your task!'
-        else:
-            flash('Task cannot be empty')
-            return redirect('/')
+                flash('Error adding task. Please try again.', 'error')
+        
+        return redirect('/')
+
     else:
         tasks = Task.query.order_by(Task.date_created).all()
         return render_template('index.html', tasks=tasks)
