@@ -50,23 +50,37 @@ def delete(id):
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/')
-    except:
-        return 'Sorry, there was a problem deleting that task!'
+        flash('Task deleted successfully!', 'success')
+    except Exception as e:
+        flash('Error deleting task. Please try again.', 'error')
+    
+    return redirect('/')
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     task = Task.query.get_or_404(id)
 
     if request.method == 'POST':
-        task.content = request.form['content']
+        task_content = request.form['content'].strip()
+
+        if not task_content:
+            flash('Task cannot be empty', 'error')
+            return render_template('update.html', task=task)
+        elif len(task_content) > 200:
+            flash('Task is too long (max 200 characters)', 'error')
+            return render_template('update.html', task=task)
+
+        task.content = task_content
+
         try:
             db.session.commit()
+            flash('Task updated successfully!', 'success')
             return redirect('/')
         except:
-            return 'There was an issue updating your task'
-    else:
-        return render_template('update.html', task=task)
+            flash('Error updating task. Please try again.', 'error')
+            return render_template('update.html', task=task)
+    
+    return render_template('update.html', task=task)
 
 @app.route('/complete/<int:id>')
 def complete(id):
@@ -75,9 +89,12 @@ def complete(id):
     
     try:
         db.session.commit()
-        return redirect('/')
-    except:
-        return 'There was an issue updating the task'
+        status = "completed" if task.completed else "marked as incomplete"
+        flash(f'Task {status}!', 'success')
+    except Exception as e:
+        flash('Error updating task status.', 'error')
+
+    return redirect('/')
 
 if __name__ == "__main__":
     with app.app_context():
