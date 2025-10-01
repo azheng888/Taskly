@@ -40,8 +40,18 @@ def index():
         return redirect('/')
 
     else:
-        tasks = Task.query.order_by(Task.date_created).all()
-        return render_template('index.html', tasks=tasks)
+
+        filter_type = request.args.get('filter', 'all')
+
+        if filter_type == 'completed':
+            tasks = Task.query.filter_by(completed=True).order_by(Task.date_created).all()
+        elif filter_type == 'active':
+            tasks = Task.query.filter_by(completed=False).order_by(Task.date_created).all()
+        else:
+            tasks = Task.query.order_by(Task.date_created).all()
+
+        
+        return render_template('index.html', tasks=tasks, filter=filter_type)
 
 @app.route('/delete/<int:id>')
 def delete(id):

@@ -101,3 +101,29 @@ a:hover {
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
+.filters {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.filter-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0 5px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+}
+
+.filter-btn:hover {
+    background-color: #e9ecef;
+}
+
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
