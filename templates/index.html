@@ -1,6 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+    <div class="filters">
+        <a href="/?filter=all" class="filter-btn {% if filter == 'all' %}active{% endif %}">All</a>
+        <a href="/?filter=active" class="filter-btn {% if filter == 'active' %}active{% endif %}">Active</a>
+        <a href="/?filter=completed" class="filter-btn {% if filter == 'completed' %}active{% endif %}">Completed</a>
+    </div>
+
+    <div class="sort-options">
+        <label for="sort">Sort by:</label>
+        <select id="sort" onchange="location.href='/?filter={{ filter }}&sort=' + this.value">
+            <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Newest First</option>
+            <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Oldest First</option>
+            <option value="alpha" {% if sort == 'alpha' %}selected{% endif %}>Alphabetical</option>
+        </select>
+    </div>
+
     <div class="form">
         <form action="/" method="POST">
             <input type="text" name="content" id="content"
@@ -10,12 +26,6 @@
                 minlength="1">
             <input type="submit" value="Add Task">
         </form>
-    </div>
-
-    <div class="filters">
-        <a href="/?filter=all" class="filter-btn {% if filter == 'all' %}active{% endif %}">All</a>
-        <a href="/?filter=active" class="filter-btn {% if filter == 'active' %}active{% endif %}">Active</a>
-        <a href="/?filter=completed" class="filter-btn {% if filter == 'completed' %}active{% endif %}">Completed</a>
     </div>
 
     {% if tasks|length < 1 %}

@@ -40,16 +40,24 @@ def index():
         return redirect('/')
 
     else:
-
         filter_type = request.args.get('filter', 'all')
+        sort_by = request.args.get('sort', 'date')
 
         if filter_type == 'completed':
-            tasks = Task.query.filter_by(completed=True).order_by(Task.date_created).all()
+            query = Task.query.filter_by(completed=True)
         elif filter_type == 'active':
-            tasks = Task.query.filter_by(completed=False).order_by(Task.date_created).all()
+            query = Task.query.filter_by(completed=False)
         else:
-            tasks = Task.query.order_by(Task.date_created).all()
+            query = Task.query
 
+        if sort_by == 'date_desc':
+            tasks = query.order_by(Task.date_created.desc()).all()
+        elif sort_by == 'date_asc':
+            tasks = query.order_by(Task.date_created.asc()).all()
+        elif sort_by == 'alpha':
+            tasks = query.order_by(Task.content).all()
+        else:
+            tasks = query.order_by(Task.date_created.desc()).all()
         
         return render_template('index.html', tasks=tasks, filter=filter_type)
 

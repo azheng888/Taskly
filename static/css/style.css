@@ -127,3 +127,26 @@ a:hover {
     color: white;
     border-color: #007bff;
 }
+
+.sort-options {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.sort-options label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.sort-options select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.sort-options select:hover {
+    border-color: #007bff;
+}
