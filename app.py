@@ -42,6 +42,7 @@ def index():
     else:
         filter_type = request.args.get('filter', 'all')
         sort_by = request.args.get('sort', 'date')
+        search_query = request.args.get('search', '').strip()
 
         if filter_type == 'completed':
             query = Task.query.filter_by(completed=True)
@@ -49,6 +50,9 @@ def index():
             query = Task.query.filter_by(completed=False)
         else:
             query = Task.query
+
+        if search_query:
+            query = query.filter(Task.content.ilike(f'%{search_query}%'))
 
         if sort_by == 'date_desc':
             tasks = query.order_by(Task.date_created.desc()).all()
@@ -59,7 +63,7 @@ def index():
         else:
             tasks = query.order_by(Task.date_created.desc()).all()
         
-        return render_template('index.html', tasks=tasks, filter=filter_type)
+        return render_template('index.html', tasks=tasks, filter=filter_type, sort=sort_by, search=search_query)
 
 @app.route('/delete/<int:id>')
 def delete(id):

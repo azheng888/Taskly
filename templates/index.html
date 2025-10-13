@@ -17,6 +17,18 @@
         </select>
     </div>
 
+    <div class="search-box">
+        <form action="/" method="GET">
+            <input type="hidden" name="filter" value="{{ filter }}">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="text" name="search" id="search" placeholder="Search tasks..." value="{{ search }}">
+            <input type="submit" value="Search">
+            {% if search %}
+                <a href="/?filter={{ filter }}&sort={{ sort }}" class="clear-search">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
     <div class="form">
         <form action="/" method="POST">
             <input type="text" name="content" id="content"
