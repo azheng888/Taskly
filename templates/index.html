@@ -36,6 +36,7 @@
                 required
                 maxlength="200"
                 minlength="1">
+            <input type="date" name="due_date" id="due_date">
             <input type="submit" value="Add Task">
         </form>
     </div>
@@ -59,6 +60,16 @@
                         {% endif %}
                     </td>
                     <td>{{ task.date_created.date() }}</td>
+                    <td>
+                        {% if task.due_date %}
+                            {{ task.due_date.date() }}
+                            {% if task.due_date.date() < today and not task.completed %}
+                                <span class="overdue-label">OVERDUE</span>
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                     <td>
                         {% if task.completed %}
                             <a href="/complete/{{task.id}}">Mark Incomplete</a>

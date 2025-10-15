@@ -195,3 +195,13 @@ a:hover {
 .clear-search:hover {
     background-color: #5a6268;
 }
+
+tr.overdue {
+    background-color: #fff3cd;
+}
+
+.overdue-label {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 12px;
+}

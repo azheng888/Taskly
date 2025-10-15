@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, date
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secretdevkeyplaceholder'
@@ -13,6 +13,7 @@ class Task(db.Model):
     content = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    due_date = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -21,6 +22,7 @@ class Task(db.Model):
 def index():
     if request.method == 'POST':
         task_content = request.form['content'].strip()
+        due_date_str = request.form.get('due_date', '').strip()
         
         if not task_content:
             flash('Task cannot be empty', 'error')
@@ -29,6 +31,13 @@ def index():
         else:
             new_task = Task(content=task_content)
             
+            if due_date_str:
+                try:
+                    new_task.due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+                except ValueError:
+                    flash('Invalid date format', 'error')
+                    return redirect('/')
+                
             try:
                 db.session.add(new_task)
                 db.session.commit()
@@ -63,7 +72,7 @@ def index():
         else:
             tasks = query.order_by(Task.date_created.desc()).all()
         
-        return render_template('index.html', tasks=tasks, filter=filter_type, sort=sort_by, search=search_query)
+        return render_template('index.html', tasks=tasks, filter=filter_type, sort=sort_by, search=search_query, today=date.today())
 
 @app.route('/delete/<int:id>')
 def delete(id):
