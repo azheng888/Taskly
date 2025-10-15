@@ -93,6 +93,7 @@ def update(id):
 
     if request.method == 'POST':
         task_content = request.form['content'].strip()
+        due_date_str = request.form.get('due_date', '').strip()
 
         if not task_content:
             flash('Task cannot be empty', 'error')
@@ -102,6 +103,15 @@ def update(id):
             return render_template('update.html', task=task)
 
         task.content = task_content
+
+        if due_date_str:
+            try:
+                task.due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+            except ValueError:
+                flash('Invalid date format', 'error')
+                return render_template('update.html', task=task)
+        else:
+            task.due_date = None
 
         try:
             db.session.commit()

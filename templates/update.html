@@ -7,6 +7,8 @@
                 required
                 maxlength="200"
                 minlength="1">
+            <input type="date" name="due_date" id="due_date" 
+                value="{% if task.due_date %}{{ task.due_date.strftime('%Y-%m-%d') }}{% endif %}">
             <input type="submit" value="Update Task">
         </form>
     </div>
