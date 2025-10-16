@@ -46,16 +46,22 @@
     {% else %}
         <table>
             <tr>
+                <th>Status</th>
                 <th>Task</th>
                 <th>Created</th>
                 <th>Due Date</th>
                 <th>Actions</th>
             </tr>
             {% for task in tasks %}
-                <tr>
+                <tr class="{% if task.due_date and task.due_date.date() < today and not task.completed %}overdue{% endif %}">
                     <td>
                         {% if task.completed %}
-                            <s>{{ task.content }}</s> ✓
+                            ✓
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.completed %}
+                            <s>{{ task.content }}</s>
                         {% else %}
                             {{ task.content }}
                         {% endif %}
