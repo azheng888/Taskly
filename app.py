@@ -11,7 +11,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 with app.app_context():
+    print("Creating database tables...")
+    print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     db.create_all()
+    print("Tables created successfully")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
