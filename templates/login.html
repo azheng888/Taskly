@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Login to Taskly</h2>
+    
+    <div class="auth-form">
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+            
+            <button type="submit" class="auth-btn">Login</button>
+        </form>
+        
+        <p class="auth-link">Don't have an account? <a href="/register">Register here</a></p>
+    </div>
+</div>
+{% endblock %}

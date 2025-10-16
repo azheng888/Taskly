@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Todo App{% endblock %}</title>
+    <title>{% block title %}Taskly{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
+
+        {% if current_user.is_authenticated %}
+        <div style="text-align: right; margin-bottom: 20px;">
+            <span style="color: #6b7280; margin-right: 15px;">Welcome, {{ current_user.username }}!</span>
+            <a href="/logout" style="color: #dc2626;">Logout</a>
+        </div>
+        {% endif %}
+
         <h1>Taskly</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
