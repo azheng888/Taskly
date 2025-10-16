@@ -3,18 +3,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
+import os
+from pathlib import Path
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secretdevkeyplaceholder'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
+instance_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
+os.makedirs(instance_path, exist_ok=True)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secretdevkeyplaceholder')
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "tasks.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 with app.app_context():
-    print("Creating database tables...")
-    print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     db.create_all()
-    print("Tables created successfully")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
