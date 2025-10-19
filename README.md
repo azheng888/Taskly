@@ -17,10 +17,14 @@ A simple and clean task management web application built with Flask. Users can c
 
 - **Backend:** Flask, SQLAlchemy
 - **Frontend:** HTML, CSS, Jinja2
-- **Database:** SQLite
+- **Database:** SQLite (development), PostgreSQL (production)
 - **Authentication:** Flask-Login, Werkzeug (password hashing)
+- **Deployment:** Render
+
 
 ## Installation
+
+### Local Development
 
 1. Clone the repository
 ```bash
@@ -45,6 +49,15 @@ python app.py
 ```
 
 5. Open your browser and go to `http://localhost:5000`
+
+### Production Deployment
+
+The app is configured to use PostgreSQL in production and SQLite for local development. When deploying to platforms like Render:
+
+1. Create a PostgreSQL database
+2. Set the `DATABASE_URL` environment variable
+3. The app will automatically use PostgreSQL and create the necessary tables
+
 
 ## Usage
 
