@@ -1,25 +1,50 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="auth-container">
-    <h2>Login to Taskly</h2>
-    
-    <div class="auth-form">
+{% block body %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Taskly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-brand">
+            <span class="auth-brand-text">
+                <span class="auth-brand-icon">✓</span>
+                Taskly
+            </span>
+        </div>
+        <p class="auth-subtitle">Sign in to your account</p>
+
+        <div class="auth-flash">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
         <form action="/login" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" name="username" id="username" required>
+                <input type="text" name="username" id="username" placeholder="Enter your username" required autofocus>
             </div>
-            
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" required>
+                <input type="password" name="password" id="password" placeholder="Enter your password" required>
             </div>
-            
-            <button type="submit" class="auth-btn">Login</button>
+            <button type="submit" class="auth-btn">Sign In</button>
         </form>
-        
-        <p class="auth-link">Don't have an account? <a href="/register">Register here</a></p>
+
+        <p class="auth-footer">Don't have an account? <a href="/register">Create one</a></p>
     </div>
 </div>
+</body>
+</html>
 {% endblock %}

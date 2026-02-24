@@ -1,30 +1,54 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="auth-container">
-    <h2>Create Account</h2>
-    
-    <div class="auth-form">
+{% block body %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — Taskly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-brand">
+            <span class="auth-brand-text">
+                <span class="auth-brand-icon">✓</span>
+                Taskly
+            </span>
+        </div>
+        <p class="auth-subtitle">Create a new account</p>
+
+        <div class="auth-flash">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
         <form action="/register" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" name="username" id="username" required minlength="3" maxlength="80">
+                <input type="text" name="username" id="username" placeholder="Choose a username" required minlength="3" maxlength="80" autofocus>
             </div>
-            
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" required>
+                <input type="email" name="email" id="email" placeholder="Enter your email" required>
             </div>
-            
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" required minlength="6">
+                <input type="password" name="password" id="password" placeholder="At least 6 characters" required minlength="6">
             </div>
-            
-            <button type="submit" class="auth-btn">Register</button>
+            <button type="submit" class="auth-btn">Create Account</button>
         </form>
-        
-        <p class="auth-link">Already have an account? <a href="/login">Login here</a></p>
+
+        <p class="auth-footer">Already have an account? <a href="/login">Sign in</a></p>
     </div>
 </div>
+</body>
+</html>
 {% endblock %}

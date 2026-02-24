@@ -7,17 +7,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-
+{% block body %}
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Taskly</a>
         {% if current_user.is_authenticated %}
-        <div style="text-align: right; margin-bottom: 20px;">
-            <span style="color: #6b7280; margin-right: 15px;">Welcome, {{ current_user.username }}!</span>
-            <a href="/logout" style="color: #dc2626;">Logout</a>
+        <div class="navbar-right">
+            <span class="navbar-username">{{ current_user.username }}</span>
+            <a href="/logout" class="navbar-logout">Logout</a>
         </div>
         {% endif %}
+    </nav>
 
-        <h1>Taskly</h1>
-
+    <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -25,8 +26,11 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+    </div>
 
+    <div class="main-content">
         {% block content %}{% endblock %}
     </div>
+{% endblock %}
 </body>
 </html>

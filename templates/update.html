@@ -1,17 +1,45 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="form">
-        <form action="/update/{{task.id}}" method="POST">
-            <input type="text" name="content" id="content" value="{{task.content}}"
-                required
-                maxlength="200"
-                minlength="1">
-            <input type="date" name="due_date" id="due_date" 
-                value="{% if task.due_date %}{{ task.due_date.strftime('%Y-%m-%d') }}{% endif %}">
-            <input type="submit" value="Update Task">
+<div class="update-page">
+    <div class="update-card">
+        <h2 class="update-title">Edit Task</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}" style="margin-bottom:16px">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/update/{{ task.id }}" method="POST">
+            <input class="update-content-input" type="text" name="content"
+                   value="{{ task.content }}" required maxlength="200" minlength="1"
+                   placeholder="Task description">
+
+            <div class="update-row">
+                <div class="update-field">
+                    <label for="priority">Priority</label>
+                    <select name="priority" id="priority">
+                        <option value="high"   {% if task.priority == 'high'   %}selected{% endif %}>High</option>
+                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="low"    {% if task.priority == 'low'    %}selected{% endif %}>Low</option>
+                    </select>
+                </div>
+                <div class="update-field">
+                    <label for="due_date">Due Date</label>
+                    <input type="date" name="due_date" id="due_date"
+                           value="{% if task.due_date %}{{ task.due_date.strftime('%Y-%m-%d') }}{% endif %}"
+                           min="{{ today.strftime('%Y-%m-%d') }}">
+                </div>
+            </div>
+
+            <div class="update-actions">
+                <button class="btn-save" type="submit">Save Changes</button>
+                <a class="btn-back" href="/">&#8592; Back to tasks</a>
+            </div>
         </form>
     </div>
-    
-    <p><a href="/">Back to tasks</a></p>
+</div>
 {% endblock %}

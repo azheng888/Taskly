@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+import csv
+import io
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
+from sqlalchemy import case
 import os
 from pathlib import Path
 
@@ -41,7 +44,7 @@ class User(UserMixin, db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
-    
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -56,6 +59,7 @@ class Task(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     due_date = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    priority = db.Column(db.String(10), nullable=False, default='medium')
 
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -63,31 +67,37 @@ class Task(db.Model):
 with app.app_context():
     db.create_all()
 
+VALID_PRIORITIES = ('high', 'medium', 'low')
+
+def parse_priority(form_value):
+    p = (form_value or 'medium').strip().lower()
+    return p if p in VALID_PRIORITIES else 'medium'
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    
+
     if request.method == 'POST':
         username = request.form.get('username').strip()
         email = request.form.get('email').strip()
         password = request.form.get('password')
-        
+
         if not username or not email or not password:
             flash('All fields are required', 'error')
             return render_template('register.html')
-        
+
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'error')
             return render_template('register.html')
-        
+
         if User.query.filter_by(email=email).first():
             flash('Email already registered', 'error')
             return render_template('register.html')
-        
+
         user = User(username=username, email=email)
         user.set_password(password)
-        
+
         try:
             db.session.add(user)
             db.session.commit()
@@ -95,20 +105,20 @@ def register():
             return redirect(url_for('login'))
         except:
             flash('Error creating account', 'error')
-    
+
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         user = User.query.filter_by(username=username).first()
-        
+
         if user and user.check_password(password):
             login_user(user)
             flash('Logged in successfully!', 'success')
@@ -116,7 +126,7 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'error')
-    
+
     return render_template('login.html')
 
 @app.route('/logout')
@@ -132,35 +142,36 @@ def index():
     if request.method == 'POST':
         task_content = request.form['content'].strip()
         due_date_str = request.form.get('due_date', '').strip()
-        
+        priority = parse_priority(request.form.get('priority', 'medium'))
+
         if not task_content:
             flash('Task cannot be empty', 'error')
         elif len(task_content) > 200:
             flash('Task is too long (max 200 characters)', 'error')
         else:
-            new_task = Task(content=task_content, user_id=current_user.id)
-            
+            new_task = Task(content=task_content, user_id=current_user.id, priority=priority)
+
             if due_date_str:
                 try:
                     new_task.due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
                 except ValueError:
                     flash('Invalid date format', 'error')
                     return redirect('/')
-                
+
             try:
                 db.session.add(new_task)
                 db.session.commit()
                 flash('Task added successfully!', 'success')
-                
+
             except Exception as e:
-                print (e)
+                print(e)
                 flash('Error adding task. Please try again.', 'error')
-        
+
         return redirect('/')
 
     else:
         filter_type = request.args.get('filter', 'all')
-        sort_by = request.args.get('sort', 'date')
+        sort_by = request.args.get('sort', 'date_desc')
         search_query = request.args.get('search', '').strip()
 
         if filter_type == 'completed':
@@ -173,16 +184,38 @@ def index():
         if search_query:
             query = query.filter(Task.content.ilike(f'%{search_query}%'))
 
-        if sort_by == 'date_desc':
-            tasks = query.order_by(Task.date_created.desc()).all()
-        elif sort_by == 'date_asc':
+        PRIORITY_ORDER = case(
+            (Task.priority == 'high', 1),
+            (Task.priority == 'medium', 2),
+            (Task.priority == 'low', 3),
+            else_=2
+        )
+
+        if sort_by == 'date_asc':
             tasks = query.order_by(Task.date_created.asc()).all()
         elif sort_by == 'alpha':
             tasks = query.order_by(Task.content).all()
+        elif sort_by == 'priority':
+            tasks = query.order_by(PRIORITY_ORDER).all()
         else:
             tasks = query.order_by(Task.date_created.desc()).all()
-        
-        return render_template('index.html', tasks=tasks, filter=filter_type, sort=sort_by, search=search_query, today=date.today())
+
+        all_tasks = Task.query.filter_by(user_id=current_user.id).all()
+        total_count = len(all_tasks)
+        active_count = sum(1 for t in all_tasks if not t.completed)
+        completed_count = sum(1 for t in all_tasks if t.completed)
+
+        return render_template(
+            'index.html',
+            tasks=tasks,
+            filter=filter_type,
+            sort=sort_by,
+            search=search_query,
+            today=date.today(),
+            total_count=total_count,
+            active_count=active_count,
+            completed_count=completed_count,
+        )
 
 @app.route('/delete/<int:id>')
 @login_required
@@ -195,7 +228,7 @@ def delete(id):
         flash('Task deleted successfully!', 'success')
     except Exception as e:
         flash('Error deleting task. Please try again.', 'error')
-    
+
     return redirect('/')
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
@@ -206,22 +239,24 @@ def update(id):
     if request.method == 'POST':
         task_content = request.form['content'].strip()
         due_date_str = request.form.get('due_date', '').strip()
+        priority = parse_priority(request.form.get('priority', 'medium'))
 
         if not task_content:
             flash('Task cannot be empty', 'error')
-            return render_template('update.html', task=task)
+            return render_template('update.html', task=task, today=date.today())
         elif len(task_content) > 200:
             flash('Task is too long (max 200 characters)', 'error')
-            return render_template('update.html', task=task)
+            return render_template('update.html', task=task, today=date.today())
 
         task.content = task_content
+        task.priority = priority
 
         if due_date_str:
             try:
                 task.due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
             except ValueError:
                 flash('Invalid date format', 'error')
-                return render_template('update.html', task=task)
+                return render_template('update.html', task=task, today=date.today())
         else:
             task.due_date = None
 
@@ -231,16 +266,16 @@ def update(id):
             return redirect('/')
         except:
             flash('Error updating task. Please try again.', 'error')
-            return render_template('update.html', task=task)
-    
-    return render_template('update.html', task=task)
+            return render_template('update.html', task=task, today=date.today())
+
+    return render_template('update.html', task=task, today=date.today())
 
 @app.route('/complete/<int:id>')
 @login_required
 def complete(id):
     task = Task.query.filter_by(id=id, user_id=current_user.id).first_or_404()
     task.completed = not task.completed
-    
+
     try:
         db.session.commit()
         status = "completed" if task.completed else "marked as incomplete"
@@ -249,6 +284,27 @@ def complete(id):
         flash('Error updating task status.', 'error')
 
     return redirect('/')
+
+@app.route('/export')
+@login_required
+def export():
+    tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.date_created.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Task', 'Priority', 'Status', 'Created', 'Due Date'])
+    for task in tasks:
+        writer.writerow([
+            task.content,
+            task.priority.capitalize(),
+            'Completed' if task.completed else 'Active',
+            task.date_created.strftime('%Y-%m-%d'),
+            task.due_date.strftime('%Y-%m-%d') if task.due_date else '',
+        ])
+    output.seek(0)
+    response = make_response(output.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=tasks.csv'
+    response.headers['Content-Type'] = 'text/csv'
+    return response
 
 if __name__ == "__main__":
     with app.app_context():
