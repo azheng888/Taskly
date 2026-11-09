@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} · Taskly{% endblock %}
+
+{% block content %}
+<div class="error-page rise">
+    <span class="eyebrow mono">Error {{ code }}</span>
+    <h1 class="display page-title">{{ title }}.</h1>
+    <p class="page-lede">{{ message }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Back to tasks</a>
+</div>
+{% endblock %}

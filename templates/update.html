@@ -1,45 +1,70 @@
 {% extends 'base.html' %}
 
+{% block title %}Edit task · Taskly{% endblock %}
+
 {% block content %}
-<div class="update-page">
-    <div class="update-card">
-        <h2 class="update-title">Edit Task</h2>
+{% set f = form or {} %}
+{% set content = f.get('content', task.content) %}
+{% set notes = f.get('notes', task.notes or '') %}
+{% set priority = f.get('priority', task.priority) %}
+{% set due = f.get('due_date', task.due_date.strftime('%Y-%m-%d') if task.due_date else '') %}
+<div class="narrow">
+    <a href="{{ url_for('index') }}" class="back-link">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        All tasks
+    </a>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert {{ category }}" style="margin-bottom:16px">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    <header class="page-head rise">
+        <span class="eyebrow">{% if task.completed %}Completed{% else %}Open{% endif %} <span class="eyebrow-sep">·</span> {% set created = to_local(task.date_created) %}Added {{ created.strftime('%b') }} {{ created.day }}</span>
+        <h1 class="display page-title">Edit task</h1>
+    </header>
 
-        <form action="/update/{{ task.id }}" method="POST">
-            <input class="update-content-input" type="text" name="content"
-                   value="{{ task.content }}" required maxlength="200" minlength="1"
-                   placeholder="Task description">
+    <form class="card form-card rise rise-2" action="{{ url_for('update', id=task.id) }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <div class="update-row">
-                <div class="update-field">
-                    <label for="priority">Priority</label>
-                    <select name="priority" id="priority">
-                        <option value="high"   {% if task.priority == 'high'   %}selected{% endif %}>High</option>
-                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
-                        <option value="low"    {% if task.priority == 'low'    %}selected{% endif %}>Low</option>
-                    </select>
+        <div class="field-group">
+            <label for="content" class="field-label">Task</label>
+            <input id="content" class="field field-lg" type="text" name="content" value="{{ content }}"
+                   required maxlength="200" autofocus>
+        </div>
+
+        <div class="field-group">
+            <label for="notes" class="field-label">Notes <span class="field-optional">Optional</span></label>
+            <textarea id="notes" class="field field-area" name="notes" rows="4" maxlength="2000"
+                      placeholder="Context, links, next steps…">{{ notes }}</textarea>
+        </div>
+
+        <div class="field-row">
+            <fieldset class="field-group">
+                <legend class="field-label">Priority</legend>
+                <div class="chips">
+                    {% for p in ['high', 'medium', 'low'] %}
+                    <label class="chip chip-{{ p }}">
+                        <input type="radio" name="priority" value="{{ p }}" class="sr-only" {% if priority == p %}checked{% endif %}>
+                        <span class="dot dot-{{ p }}" aria-hidden="true"></span>{{ p|capitalize }}
+                    </label>
+                    {% endfor %}
                 </div>
-                <div class="update-field">
-                    <label for="due_date">Due Date</label>
-                    <input type="date" name="due_date" id="due_date"
-                           value="{% if task.due_date %}{{ task.due_date.strftime('%Y-%m-%d') }}{% endif %}"
-                           min="{{ today.strftime('%Y-%m-%d') }}">
+            </fieldset>
+
+            <div class="field-group">
+                <label for="due_date" class="field-label">Due date</label>
+                <div class="date-clear">
+                    <input id="due_date" class="field field-date" type="date" name="due_date" value="{{ due }}">
+                    <button type="button" class="text-link" data-clear="#due_date">Clear</button>
                 </div>
             </div>
+        </div>
 
-            <div class="update-actions">
-                <button class="btn-save" type="submit">Save Changes</button>
-                <a class="btn-back" href="/">&#8592; Back to tasks</a>
-            </div>
-        </form>
-    </div>
+        <div class="form-actions">
+            <a class="btn btn-outline" href="{{ url_for('index') }}">Cancel</a>
+            <button class="btn btn-primary" type="submit">Save changes</button>
+        </div>
+    </form>
+
+    <form class="danger-row" action="{{ url_for('delete', id=task.id) }}" method="POST" data-confirm="Delete this task?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="text-link text-danger">Delete this task</button>
+    </form>
 </div>
 {% endblock %}

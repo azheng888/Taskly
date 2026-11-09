@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Account · Taskly{% endblock %}
+
+{% block content %}
+<div class="narrow">
+    <header class="page-head rise">
+        <span class="eyebrow">Account</span>
+        <h1 class="display page-title">{{ current_user.username }}</h1>
+        <p class="page-lede">{{ current_user.email }}</p>
+    </header>
+
+    {% if stats %}
+    <dl class="stat-strip card rise rise-2">
+        <div><dt>Total</dt><dd class="display">{{ stats.total }}</dd></div>
+        <div><dt>Open</dt><dd class="display">{{ stats.active }}</dd></div>
+        <div><dt>Completed</dt><dd class="display">{{ stats.completed }}</dd></div>
+        <div><dt>This week</dt><dd class="display">{{ stats.done_this_week }}</dd></div>
+    </dl>
+    {% endif %}
+
+    <section class="section" aria-labelledby="pw-title">
+        <div class="section-head">
+            <span class="section-num mono">01</span>
+            <h2 id="pw-title" class="eyebrow">Change password</h2>
+        </div>
+        <form class="card form-card" action="{{ url_for('account') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="change_password">
+            <div class="field-row">
+                <div class="field-group">
+                    <label for="current_password" class="field-label">Current password</label>
+                    <input id="current_password" class="field" type="password" name="current_password" autocomplete="current-password" required>
+                </div>
+                <div class="field-group">
+                    <label for="new_password" class="field-label">New password <span class="field-optional">8+ characters</span></label>
+                    <input id="new_password" class="field" type="password" name="new_password" autocomplete="new-password" required minlength="8">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update password</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="section" aria-labelledby="data-title">
+        <div class="section-head">
+            <span class="section-num mono">02</span>
+            <h2 id="data-title" class="eyebrow">Your data</h2>
+        </div>
+        <div class="card form-card row-card">
+            <div>
+                <p class="row-title">Export tasks</p>
+                <p class="row-sub">Download every task as a CSV file.</p>
+            </div>
+            <a href="{{ url_for('export') }}" class="btn btn-outline">Download CSV</a>
+        </div>
+    </section>
+
+    <section class="section" aria-labelledby="danger-title">
+        <div class="section-head">
+            <span class="section-num mono">03</span>
+            <h2 id="danger-title" class="eyebrow">Delete account</h2>
+        </div>
+        <form class="card form-card danger-card" action="{{ url_for('account') }}" method="POST"
+              data-confirm="Permanently delete your account and all tasks? This cannot be undone.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="delete_account">
+            <p class="row-sub">This permanently removes your account and every task. It can't be undone.</p>
+            <div class="field-row">
+                <div class="field-group">
+                    <label for="confirm_password" class="field-label">Confirm with your password</label>
+                    <input id="confirm_password" class="field" type="password" name="current_password" autocomplete="current-password" required>
+                </div>
+                <div class="form-actions form-actions-end">
+                    <button type="submit" class="btn btn-danger">Delete account</button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

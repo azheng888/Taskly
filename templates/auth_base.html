@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block body_class %}auth-body{% endblock %}
+{% block header %}{% endblock %}
+{% block main_class %}auth{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<section class="auth-intro" aria-hidden="true">
+    <a href="{{ url_for('login') }}" class="wordmark"><span class="wordmark-mark"></span>Taskly</a>
+    <div class="auth-intro-copy rise">
+        <span class="eyebrow">A calmer to-do list</span>
+        <p class="display auth-display">Plan lightly,<br><em>finish fully.</em></p>
+    </div>
+    <ul class="auth-points rise rise-2">
+        <li><span class="section-num mono">01</span><span><strong>Capture</strong> tasks in a keystroke, with a priority and a due date.</span></li>
+        <li><span class="section-num mono">02</span><span><strong>Focus</strong> on what is due today and what slipped.</span></li>
+        <li><span class="section-num mono">03</span><span><strong>Finish</strong> and watch the list get lighter.</span></li>
+    </ul>
+</section>
+
+<section class="auth-panel">
+    <div class="auth-card rise rise-2">
+        <a href="{{ url_for('login') }}" class="wordmark auth-mobile-mark"><span class="wordmark-mark" aria-hidden="true"></span>Taskly</a>
+        {% block auth_content %}{% endblock %}
+    </div>
+</section>
+{% endblock %}
