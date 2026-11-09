@@ -3,34 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#050705">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Taskly{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%23050705'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23a9b9a2' stroke-width='2'/%3E%3Cpath d='M12 16.5l3 3 5-6' fill='none' stroke='%23f5f5ef' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        // Share the browser's time zone so "today" and "overdue" match the user's clock.
+        (function () {
+            try {
+                var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (tz && document.cookie.indexOf('tz=' + encodeURIComponent(tz)) === -1) {
+                    document.cookie = 'tz=' + encodeURIComponent(tz) + ';path=/;max-age=31536000;samesite=lax';
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
-<body>
-{% block body %}
-    <nav class="navbar">
-        <a href="/" class="navbar-brand">Taskly</a>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="ambient" aria-hidden="true"><span class="ambient-glow"></span></div>
+
+{% block header %}
+<header class="site-header">
+    <div class="shell header-inner">
+        <a href="{{ url_for('index') }}" class="wordmark" aria-label="Taskly home">
+            <span class="wordmark-mark" aria-hidden="true"></span>Taskly
+        </a>
         {% if current_user.is_authenticated %}
-        <div class="navbar-right">
-            <span class="navbar-username">{{ current_user.username }}</span>
-            <a href="/logout" class="navbar-logout">Logout</a>
-        </div>
+        <nav class="header-nav" aria-label="Main">
+            <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}is-current{% endif %}">Tasks</a>
+            <a href="{{ url_for('account') }}" class="nav-link {% if request.endpoint == 'account' %}is-current{% endif %}">Account</a>
+            <form action="{{ url_for('logout') }}" method="POST" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline btn-sm">Sign out</button>
+            </form>
+        </nav>
         {% endif %}
-    </nav>
-
-    <div class="flash-container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
     </div>
-
-    <div class="main-content">
-        {% block content %}{% endblock %}
-    </div>
+</header>
 {% endblock %}
+
+<div class="toasts" role="status" aria-live="polite">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="toast toast-{{ category }}">
+                <span class="toast-dot" aria-hidden="true"></span>
+                <span class="toast-text">{{ message }}</span>
+                <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+</div>
+
+<main id="main" class="{% block main_class %}shell main{% endblock %}">
+    {% block content %}{% endblock %}
+</main>
+
+{% block footer %}
+<footer class="site-footer">
+    <div class="shell footer-inner">
+        <span class="wordmark wordmark-sm"><span class="wordmark-mark" aria-hidden="true"></span>Taskly</span>
+        <span class="footer-note">Plan lightly. Finish fully.</span>
+    </div>
+</footer>
+{% endblock %}
+
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 </body>
 </html>

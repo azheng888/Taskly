@@ -1,54 +1,33 @@
-{% extends 'base.html' %}
+{% extends 'auth_base.html' %}
 
-{% block body %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register — Taskly</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-<div class="auth-page">
-    <div class="auth-card">
-        <div class="auth-brand">
-            <span class="auth-brand-text">
-                <span class="auth-brand-icon">✓</span>
-                Taskly
-            </span>
-        </div>
-        <p class="auth-subtitle">Create a new account</p>
+{% block title %}Create account · Taskly{% endblock %}
 
-        <div class="auth-flash">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
+{% block auth_content %}
+<h1 class="display auth-title">Start clear</h1>
+<p class="auth-lede">Create an account. It takes a few seconds.</p>
 
-        <form action="/register" method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" name="username" id="username" placeholder="Choose a username" required minlength="3" maxlength="80" autofocus>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" placeholder="Enter your email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" placeholder="At least 6 characters" required minlength="6">
-            </div>
-            <button type="submit" class="auth-btn">Create Account</button>
-        </form>
-
-        <p class="auth-footer">Already have an account? <a href="/login">Sign in</a></p>
+<form action="{{ url_for('register') }}" method="POST" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field-group">
+        <label for="username" class="field-label">Username</label>
+        <input id="username" class="field" type="text" name="username" value="{{ form.get('username', '') }}"
+               autocomplete="username" required minlength="3" maxlength="80" pattern="[A-Za-z0-9_.\-]{3,80}"
+               title="3–80 characters: letters, numbers, dots, dashes or underscores" autofocus>
     </div>
-</div>
-</body>
-</html>
+    <div class="field-group">
+        <label for="email" class="field-label">Email</label>
+        <input id="email" class="field" type="email" name="email" value="{{ form.get('email', '') }}"
+               autocomplete="email" required maxlength="120">
+    </div>
+    <div class="field-group">
+        <label for="password" class="field-label">Password <span class="field-optional">8+ characters</span></label>
+        <div class="password-wrap">
+            <input id="password" class="field" type="password" name="password" autocomplete="new-password" required minlength="8">
+            <button type="button" class="reveal" data-reveal="#password" aria-label="Show password">Show</button>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Create account</button>
+</form>
+
+<p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}" class="text-link">Sign in</a></p>
 {% endblock %}
